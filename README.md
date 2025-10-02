@@ -17,10 +17,8 @@ In the end, I would evaluate this based on how it prevents an attack from occuri
 Attack → anything that involves changing the functions docstring or underlying code
 Ex. Tool Poisoning Attack
 ALSO: Could measure performance in the end!!!
-
-1. start rust project
-2. create test python files.
-3. be able to parse and grab all functions in the file
+ALSO: what should i use to lint and test my rust code?
+ALSO: setup and integrate with pypi
 
 ```text
 vurze/
@@ -60,28 +58,14 @@ vurze/
 ```
 
 ```text
-https://www.youtube.com/watch?v=01hYL76B_d8 to setup py03
-https://www.youtube.com/watch?v=fgC8YxNwBfQ another good one. explaining how
-https://www.youtube.com/watch?v=T45ZEmSR1-s&t=173s --> useful for initial setup.
-https://www.youtube.com/watch?v=UilujdubqVU --> david hewlitt talk on py03
-```
-
-```text
-initial setup steps:
-rustc --version
-python3 --version
-
-create and activate a virtual environment
-uv install maturin
-maturin init and choose py03 as the option
-
-COMMANDS I FOLLOWED TO TEST OUT THAT IT IMPORTS CORRECTLY:
+COMMANDS I FOLLOWED TO SETUP MATURIN:
 uv venv
 source .venv/bin/activate
 uv tool install maturin
 maturin init
 select pyo3
-x
+
+COMMANDS I FOLLOWED TO TEST MATURIN INITIALLY:
 maturin develop
 python -c "import vurze; print('Vurze imported successfully!')"
 ```
