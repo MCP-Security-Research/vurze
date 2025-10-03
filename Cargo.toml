@@ -2,11 +2,23 @@
 name = "vurze"
 version = "0.1.0"
 edition = "2021"
+description = "Version control your Python functions with automated decorator injection"
+license = "MIT"
+repository = "https://github.com/yourusername/vurze"
+homepage = "https://github.com/yourusername/vurze"
+keywords = ["python", "security", "version-control", "decorators"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+# Rust-Python Bindings Library
 [lib]
 name = "vurze"
 crate-type = ["cdylib"]
 
+# CLI Binary
+[[bin]]
+name = "vurze"
+path = "src/cli.rs"  
+
+# General Project Dependencies
 [dependencies]
-pyo3 = "0.25.0"
+pyo3 = { version = "0.25.0", features = ["extension-module"] }
+clap = { version = "4.0", features = ["derive"] }

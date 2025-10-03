@@ -19,6 +19,7 @@ Ex. Tool Poisoning Attack
 ALSO: Could measure performance in the end!!!
 ALSO: what should i use to lint and test my rust code?
 ALSO: setup and integrate with pypi
+how will i deal with env vars?
 
 ```text
 vurze/
@@ -68,4 +69,11 @@ select pyo3
 COMMANDS I FOLLOWED TO TEST MATURIN INITIALLY:
 maturin develop
 python -c "import vurze; print('Vurze imported successfully!')"
+```
+
+```text
+COMMANDS FOR TESTING CLAP CLI
+cargo build
+./target/debug/vurze --help
+./target/debug/vurze decorate example.py
 ```
