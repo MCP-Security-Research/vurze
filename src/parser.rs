@@ -1,9 +1,9 @@
 // parsing ast tree file
 use pyo3::prelude::*;
 
-/// Extract function names from a Python file using Python's ast module.
+/// Add decorators to functions in a Python file using Python's ast module.
 #[pyfunction]
-pub fn get_functions_from_file(py: Python, file_path: &str) -> PyResult<Vec<String>> {
+pub fn add_decorators_to_functions(py: Python, file_path: &str, decorator: &str) -> PyResult<String> {
     // Import Python's ast module to access AST parsing functionality
     // The ? operator propagates any import errors up to the caller
     let ast = py.import("ast")?;
@@ -20,13 +20,10 @@ pub fn get_functions_from_file(py: Python, file_path: &str) -> PyResult<Vec<Stri
     // call_method1 calls the Python method "parse" with one argument (the content)
     let tree = ast.call_method1("parse", (content,))?;
     
-    // Initialize a vector to store the function names we discover
-    let mut function_names = Vec::new();
-    
     // Create an iterator that will walk through every node in the AST tree
     // ast.walk() is a Python generator that yields every node in the tree in depth-first order
     // This allows us to examine each node without having to implement our own tree traversal
-    let walk_iter = ast.call_method1("walk", (tree,))?;
+    let walk_iter = ast.call_method1("walk", (tree.clone(),))?;
     
     // Iterate through each node in the AST
     // try_iter() converts the Python iterator into a Rust iterator that can handle errors
@@ -44,23 +41,47 @@ pub fn get_functions_from_file(py: Python, file_path: &str) -> PyResult<Vec<Stri
         // "FunctionDef" = regular function (def function_name():)
         // "AsyncFunctionDef" = asynchronous function (async def function_name():)
         if node_type == "FunctionDef" || node_type == "AsyncFunctionDef" {
-            // Attempt to extract the function name from the node
-            // getattr("name") accesses the 'name' attribute of the function node
-            // We use if let Ok(...) because not all nodes may have a name attribute
-            if let Ok(name) = node.getattr("name") {
-                // Convert the Python string object to a Rust String
-                // extract() performs the type conversion from Python object to Rust type
-                let name_str: String = name.extract()?;
+            // Add decorator to the function's decorator list
+            // First, get the decorator_list attribute from the function node
+            if let Ok(decorator_list) = node.getattr("decorator_list") {
+                // Create a new AST Name node for the decorator
+                let name_node = ast.call_method1("Name", (decorator, ast.getattr("Load")?,))?;
                 
-                // Add the function name to our collection
-                function_names.push(name_str);
+                // Append the decorator to the function's decorator list
+                decorator_list.call_method1("append", (name_node,))?;
             }
         }
     }
     
-    // Return the collected function names wrapped in Ok()
-    // This indicates successful completion of the function
-    Ok(function_names)
+    // Convert the modified AST back to Python source code
+    let modified_code = ast.call_method1("unparse", (tree,))?;
+    let code_str: String = modified_code.extract()?;
+    
+    // Return the modified Python code
+    Ok(code_str)
 }
 
-// add decorator function --> 
+// change the get_functions_from_file( function to be add decorators to functions function. 
+// add the parameter decorator: &str
+// and also change the inside of the if statement to add this decorator to every function       if node_type == "FunctionDef" || node_type == "AsyncFunctionDef" {
+
+/*
+import os
+import ast
+import sys
+import inspect
+
+from graffito import graffiti
+
+def emboss(elem: callable, name: str = "", checksum: str = ""):
+    if os.path.exists(elem):
+        src = open(elem, "r").read()
+    else:
+        src = inspect.getsource(elem)
+    tree = ast.parse(src)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) or isinstance(node, ast.ClassDef):
+            if name == node.name:
+                node.decorator_list.append(ast.Name(checksum))
+    mod = ast.unparse(tree)
+*/

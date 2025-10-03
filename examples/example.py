@@ -18,50 +18,41 @@ async def fetch_user_data(user_id):
     await asyncio.sleep(0.1)
     return {"id": user_id, "name": f"User {user_id}"}
 
-# Test the get_functions_from_file function
-def test_function_extraction():
-    """Test the get_functions_from_file function with this current file."""
+# Test the add_decorators_to_functions function
+def test_decorator_addition():
+    """Test the add_decorators_to_functions function with this current file."""
     import os
     
     # Get the current file path
     current_file = __file__
-    print(f"Testing get_functions_from_file with: {current_file}")
+    print(f"Testing add_decorators_to_functions with: {current_file}")
+    print(f"Adding decorator: @my_decorator")
     
     try:
-        # Call the Rust function to extract function names from this file
-        functions = vurze.get_functions_from_file(current_file)
+        # Call the Rust function to add decorators to all functions in this file
+        modified_code = vurze.add_decorators_to_functions(current_file, "my_decorator")
         
-        print(f"\nFound {len(functions)} functions:")
-        for i, func_name in enumerate(functions, 1):
-            print(f"  {i}. {func_name}")
-            
-        # Expected functions in this file
-        expected_functions = ["greet", "calculate_area", "fetch_user_data", "test_function_extraction"]
+        print("\n" + "="*80)
+        print("MODIFIED PYTHON CODE WITH DECORATORS:")
+        print("="*80)
+        print(modified_code)
+        print("="*80)
         
-        print(f"\nExpected functions: {expected_functions}")
-        print(f"Found functions: {functions}")
+        # Count how many @my_decorator occurrences we added
+        decorator_count = modified_code.count("@my_decorator")
+        print(f"\n✅ Successfully added {decorator_count} '@my_decorator' decorators!")
         
-        # Check if we found all expected functions
-        missing = [f for f in expected_functions if f not in functions]
-        extra = [f for f in functions if f not in expected_functions]
-        
-        if missing:
-            print(f"Missing functions: {missing}")
-        if extra:
-            print(f"Extra functions found: {extra}")
-        
-        if not missing and not extra:
-            print("✅ Perfect match! All expected functions found.")
-        else:
-            print("⚠️  Some differences found, but that's okay for testing.")
+        # Show which functions should have received decorators
+        expected_functions = ["greet", "calculate_area", "fetch_user_data", "test_decorator_addition"]
+        print(f"Expected to decorate functions: {expected_functions}")
             
     except Exception as e:
-        print(f"❌ Error testing get_functions_from_file: {e}")
+        print(f"❌ Error testing add_decorators_to_functions: {e}")
         return False
     
     return True
 
 if __name__ == "__main__":
-    print("Testing vurze.get_functions_from_file function")
+    print("Testing vurze.add_decorators_to_functions function")
     print("=" * 50)
-    test_function_extraction()
+    test_decorator_addition()

@@ -1,12 +1,12 @@
 use pyo3::prelude::*;
 
 mod parser;
-use parser::get_functions_from_file;
+use parser::add_decorators_to_functions;
 
 /// A Python module implemented in Rust.
 #[pymodule]
 fn vurze(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(get_functions_from_file, m)?)?;
+    m.add_function(wrap_pyfunction!(add_decorators_to_functions, m)?)?;
     Ok(())
 }
 
