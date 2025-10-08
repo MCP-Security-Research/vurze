@@ -2,6 +2,9 @@
 
 use pyo3::prelude::*;
 
+/* i need a function that will return x so that i can encrypt it and then add it. just do in add decorators function
+*/
+
 #[pyfunction]
 pub fn add_decorators_to_functions(py: Python, file_path: &str, decorator: &str) -> PyResult<String> {
     // Import Python's ast module to access AST parsing functionality
@@ -48,3 +51,8 @@ pub fn add_decorators_to_functions(py: Python, file_path: &str, decorator: &str)
     // Return the modified Python code
     Ok(code_str)
 }
+
+/* i need a function that will extract all of the decorators from a python file that are named x 
+and call the cryptographic function to verify that the hash matches. return true if it does
+*/
+
