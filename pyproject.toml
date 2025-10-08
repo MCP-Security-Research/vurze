@@ -5,14 +5,12 @@ build-backend = "maturin"
 [project]
 name = "vurze"
 version = "0.1.0"
-description = "Version control your Python functions with cryptographic decorators"
-authors = [
-    {name = "Your Name", email = "your.email@example.com"},
-]
+description = "Version control your Python functions and classes with automated cryptographic decorator injection."
+authors = ["Aidan Dyga"]
 requires-python = ">=3.8"
 readme = "README.md"
 license = {text = "MIT"}
-keywords = ["security", "python", "version-control", "decorators", "cryptography"]
+keywords = ["rust", "python", "decorator", "version-control", "cryptography"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -35,9 +33,8 @@ dependencies = []
 vurze = "vurze.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/yourusername/vurze"
-Repository = "https://github.com/yourusername/vurze"
-Issues = "https://github.com/yourusername/vurze/issues"
+Repository = "https://github.com/MCP-Security-Research/vurze"
+Issues = "https://github.com/MCP-Security-Research/vurze/issues"
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
