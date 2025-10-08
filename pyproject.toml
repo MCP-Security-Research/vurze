@@ -6,7 +6,9 @@ build-backend = "maturin"
 name = "vurze"
 version = "0.1.0"
 description = "Version control your Python functions and classes with automated cryptographic decorator injection."
-authors = ["Aidan Dyga"]
+authors = [
+    {name = "Aidan Dyga"}
+]
 requires-python = ">=3.8"
 readme = "README.md"
 license = {text = "MIT"}
@@ -39,3 +41,4 @@ Issues = "https://github.com/MCP-Security-Research/vurze/issues"
 [tool.maturin]
 features = ["pyo3/extension-module"]
 module-name = "vurze._vurze"
+python-source = "src/python"

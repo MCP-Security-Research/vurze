@@ -12,7 +12,7 @@ import sys
 import os
 from pathlib import Path
 
-from . import add_decorators_to_functions
+from ...vurze import add_decorators_to_functions
 
 
 def main():
