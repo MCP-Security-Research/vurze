@@ -5,7 +5,7 @@ underlying Rust implementation (compiled as _vurze module). It exposes the
 core functionality for adding version control decorators to Python functions.
 """
 
-from ._vurze import add_decorators_to_functions
+from ._vurze import generate_signature_package, verify_signature_package
 
 __version__ = "0.1.0"
-__all__ = ["add_decorators_to_functions"]
+__all__ = ["generate_signature_package", "verify_signature_package"]
