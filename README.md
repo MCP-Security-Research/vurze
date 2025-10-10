@@ -1,35 +1,64 @@
-# vurze
+# Vurze
 
-Version control your Python functions and classes with automated cryptographic decorator injection.
+Version control your Python functions and classes with automated cryptographic decorator injection
 
-high level overview:
+- ⚡️ **Lightning Fast** - Built with Rust for maximum performance
+- 🔐 **Cryptographic Security** - Ed25519 signatures ensure code integrity and authorship
+- 🛠️ **CLI & Library** - Use as a command-line tool or import as a Python package
+- 🔍 **Attack Detection** - Automatically detects tampering with function code or docstrings
+- 📦 **PyO3 Powered** - Seamless Python-Rust integration via PyO3 bindings
 
-A python and rust based pypi package that automatically adds decorators to all functions and classses in a python file.
-Also supports command line arguments for automatically adding the decoratos, and checking the version of functions
+vurze helps you maintain code integrity by automatically adding cryptographic signatures to your Python functions and classes. Each function receives a unique decorator containing a cryptographic signature that verifies both authorship and integrity, making it easy to detect tool poisoning attacks and unauthorized code modifications.
+
+## Table of Contents
+
+1. [Installation](#installation)
+2. [Quick Start](#quick-start)
+3. [How It Works](#how-it-works)
+4. [CLI Commands](#cli-commands)
+5. [Configuration](#configuration)
+6. [Usage](#usage)
+7. [CI/CD Pipeline Integration](#cicd-pipeline-integration)
+8. [Contributing](#contributing)
+9. [License](#license)
+
+## Installation
+
 x
-Have an decorator for every function and class in a python file ---> py03 rust python language bindings and use the python ast module
-The decorator will use some sort of hashing/encryption to ensure both authorship and integrity of the function. i want to make sure that the function has not been tampered with
-The private key could be stored in the users .env file
-Basically it will act as a checksum to help detect potential security threats
+
+## Quick Start
+
 x
-For example: @toolname-9875348975
-In the end, I would evaluate this based on how it prevents an attack from occuring
-Attack → anything that involves changing the functions docstring or underlying code
-Ex. Tool Poisoning Attack
-ALSO: Could measure performance in the end!!!
-ALSO: what should i use to lint and test my rust code?
-ALSO: setup and integrate with pypi
-how will i deal with env vars?
 
-```text
-vurze/
-├── Cargo.toml                      # Rust package configuration
-├── pyproject.toml                  # Python package metadata
-├── README.md
-... and so on
-```
+## How It Works
 
---------------------------------------------------------
+x
+
+## CLI Commands
+
+x
+
+## Configuration
+
+x
+
+## Usage
+
+mcp content here
+
+## CI/CD Pipeline Integration
+
+x
+
+## Contributing
+
+x
+
+## License
+
+vurze is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+---
 
 development notes:
 
@@ -52,6 +81,9 @@ maturin develop --release
 vurze --help
 ```
 
-// generate a unique checksum for each function/class
-// verify the checksume when called and return true or false
-// Ed25519 asymmetric encryption
+challenges:
+crypto system
+storing private key in env var --> user sets the path to the var via the cli
+spacing issues when changed
+
+I need to have one unique key for all of the functions, not one key per function
