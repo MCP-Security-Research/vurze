@@ -5,6 +5,7 @@ Provides commands:
 - vurze init <optional arg of .env file path>: Initialize vurze with an .env file
 - vurze decorate <python_file_path>: Add decorators to functions in a Python file
 - vurze check <python_file_path>: Check the integrity of decorators in a Python file
+- vurze remove (this is cleanup code)
 """
 
 import argparse
@@ -12,7 +13,7 @@ import sys
 import os
 from pathlib import Path
 
-from .add_decorators import add_decorators_to_functions
+from .setup import setup_keypair
 
 def main():
     """Main CLI entry point."""
@@ -88,8 +89,19 @@ def main():
 
 def handle_init(args):
     """Handle the init command."""
-    # code here
-    return 1
+    try:
+        env_path = Path(args.env_file)
+        
+        # Generate and store keypair (will raise error if keys already exist)
+        setup_keypair(env_path)
+        print(f"✓ Successfully initialized vurze!")
+        print(f"✓ Keypair generated and stored in {env_path}")
+        print(f"\n⚠️  Keep your .env file secure and add it to .gitignore!")
+        
+        return 0
+    except Exception as e:
+        print(f"Error during initialization: {e}", file=sys.stderr)
+        return 1
 
 
 def handle_decorate(args):

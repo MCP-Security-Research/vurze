@@ -2,11 +2,11 @@
 
 import os
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 from dotenv import load_dotenv, set_key
 from vurze import generate_keypair
 
-def setup_keypair(env_path: Optional[str | Path] = None) -> Tuple[str, str]:
+def setup_keypair(env_path: Optional[str | Path] = None):
     """
     Generate and store keypair securely.
     
@@ -19,6 +19,15 @@ def setup_keypair(env_path: Optional[str | Path] = None) -> Tuple[str, str]:
     else:
         env_path = Path(env_path)
     
+    # Check if keys already exist
+    if env_path.exists():
+        load_dotenv(env_path)
+        existing_private = os.getenv("VURZE_PRIVATE_KEY")
+        existing_public = os.getenv("VURZE_PUBLIC_KEY")
+        
+        if existing_private or existing_public:
+            raise ValueError(f"Keys already exist in {env_path}. Cannot overwrite existing keys.")
+    
     # Create .env if it doesn't exist
     env_path.touch(exist_ok=True)
 
@@ -28,9 +37,6 @@ def setup_keypair(env_path: Optional[str | Path] = None) -> Tuple[str, str]:
     # Store keys in .env file
     set_key(str(env_path), "VURZE_PRIVATE_KEY", private_key_hex)
     set_key(str(env_path), "VURZE_PUBLIC_KEY", public_key_hex)
-    
-    print(f"✅ Vurze keypair generated and saved to {env_path}")
-    print("⚠️ Keep your private key secure and never commit it to version control!")
     
     return private_key_hex, public_key_hex
 
@@ -97,3 +103,6 @@ def get_private_key(env_path: Optional[str | Path] = None) -> str:
         raise ValueError(f"VURZE_PRIVATE_KEY not found in {env_path}. Run setup_keypair() first.")
     
     return private_key
+
+# add .env to gitignore??? consider
+# check if a gitignore exists
