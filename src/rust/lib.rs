@@ -11,24 +11,19 @@ fn generate_keypair() -> (String, String) {
     crypto::generate_keypair()
 }
 
-/// Generate a complete signature package for data
-/// Returns (hash, signature, public_key) 
+/// Sign data using Ed25519 with a private key
+/// Returns the signature as a hex string
 #[pyfunction]
-fn generate_signature_package(data: &str, private_key_hex: &str) -> PyResult<(String, String, String)> {
-    crypto::generate_signature_package(data, private_key_hex)
+fn generate_signature(data: &str, private_key_hex: &str) -> PyResult<String> {
+    crypto::generate_signature(data, private_key_hex)
         .map_err(|e| PyErr::new::<pyo3::exceptions::PyValueError, _>(e))
 }
 
-/// Verify a complete signature package
-/// Returns true if both the hash matches and the signature is valid
+/// Verify an Ed25519 signature
+/// Returns true if the signature is valid
 #[pyfunction]
-fn verify_signature_package(
-    data: &str,
-    hash: &str,
-    signature: &str,
-    public_key: &str,
-) -> PyResult<bool> {
-    crypto::verify_signature_package(data, hash, signature, public_key)
+fn verify_signature(data: &str, signature_hex: &str, public_key_hex: &str) -> PyResult<bool> {
+    crypto::verify_signature(data, signature_hex, public_key_hex)
         .map_err(|e| PyErr::new::<pyo3::exceptions::PyValueError, _>(e))
 }
 
@@ -36,7 +31,7 @@ fn verify_signature_package(
 #[pymodule]
 fn _vurze(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(generate_keypair, m)?)?;
-    m.add_function(wrap_pyfunction!(generate_signature_package, m)?)?;
-    m.add_function(wrap_pyfunction!(verify_signature_package, m)?)?;
+    m.add_function(wrap_pyfunction!(generate_signature, m)?)?;
+    m.add_function(wrap_pyfunction!(verify_signature, m)?)?;
     Ok(())
 }

@@ -65,13 +65,12 @@ def add_decorators_to_functions(file_path: str) -> str:
             
             # Step 4: Generate hash of the function/class source code
             '''
-            // generate keypair
+            // generate keypair --> this only is done once???
             // generate sig package
-            // verify sig package
             '''
-            
             # Step 5: Create decorator with the hash embedded (format: @vurze._<hash>())
-            decorator_name = f"vurze._{hash_value}"
+            # decorator_name = f"vurze._{hash_value}"
+            # vurze.protect(x, x, x)
             
             # Get the decorator_list attribute from the original function node
             if hasattr(node, 'decorator_list'):

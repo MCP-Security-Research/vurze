@@ -1,22 +1,7 @@
-//! Cryptographic utilities for SHA-256 hashing and Ed25519 signing.
+//! Cryptographic utilities for Ed25519 signing.
 
-use sha2::{Sha256, Digest};
 use ed25519_dalek::{Signer, Verifier, SigningKey, VerifyingKey, Signature};
 use rand::rngs::OsRng;
-
-/// Generate a SHA-256 hash from input data
-pub fn generate_hash(data: &str) -> String {
-    let mut hasher = Sha256::new();
-    hasher.update(data.as_bytes());
-    let result = hasher.finalize();
-    format!("{:x}", result)
-}
-
-/// Verify if a hash matches the input data
-pub fn verify_hash(hash: &str, data: &str) -> bool {
-    let computed_hash = generate_hash(data);
-    computed_hash == hash.to_lowercase()
-}
 
 /// Generate a new Ed25519 key pair
 /// Returns (private_key_hex, public_key_hex)
@@ -33,7 +18,7 @@ pub fn generate_keypair() -> (String, String) {
 
 /// Sign data using Ed25519 with a private key
 /// Returns the signature as a hex string
-pub fn sign_data(data: &str, private_key_hex: &str) -> Result<String, String> {
+pub fn generate_signature(data: &str, private_key_hex: &str) -> Result<String, String> {
     let private_key_bytes = hex::decode(private_key_hex)
         .map_err(|e| format!("Invalid private key hex: {}", e))?;
     
@@ -76,49 +61,4 @@ pub fn verify_signature(data: &str, signature_hex: &str, public_key_hex: &str) -
         Ok(_) => Ok(true),
         Err(_) => Ok(false),
     }
-}
-
-/// Generate a complete signature package for data
-/// Returns (hash, signature, public_key)
-/// This combines SHA-256 hashing for integrity and Ed25519 signing for authorship
-pub fn generate_signature_package(data: &str, private_key_hex: &str) -> Result<(String, String, String), String> {
-    // Generate hash for integrity
-    let hash = generate_hash(data);
-    
-    // Sign the hash for authorship
-    let signature = sign_data(&hash, private_key_hex)?;
-    
-    // Derive public key from private key
-    let private_key_bytes = hex::decode(private_key_hex)
-        .map_err(|e| format!("Invalid private key hex: {}", e))?;
-    
-    if private_key_bytes.len() != 32 {
-        return Err("Private key must be 32 bytes".to_string());
-    }
-    
-    let mut key_array = [0u8; 32];
-    key_array.copy_from_slice(&private_key_bytes);
-    
-    let signing_key = SigningKey::from_bytes(&key_array);
-    let verifying_key = signing_key.verifying_key();
-    let public_key = hex::encode(verifying_key.to_bytes());
-    
-    Ok((hash, signature, public_key))
-}
-
-/// Verify a complete signature package
-/// Returns true if both the hash matches and the signature is valid
-pub fn verify_signature_package(
-    data: &str, 
-    hash: &str, 
-    signature: &str, 
-    public_key: &str
-) -> Result<bool, String> {
-    // First verify the hash for integrity
-    if !verify_hash(hash, data) {
-        return Ok(false);
-    }
-    
-    // Then verify the signature for authorship
-    verify_signature(hash, signature, public_key)
 }
