@@ -73,37 +73,22 @@ select pyo3
 COMMANDS I FOLLOWED TO TEST MATURIN INITIALLY:
 maturin develop
 python -c "import vurze; print('Vurze imported successfully!')"
-```
 
-```text
 COMMANDS FOR TESTING CLI
 maturin develop --release
 vurze --help
 ```
 
-challenges:
-crypto system
-storing private key in env var --> user sets the path to the var via the cli
-spacing issues when changed
+todo:
 
-one decorator that looks like this: vurze.protect(x)
-or
-multiple decorators that look like this: @vurze.x(), @vurze.x()
-
-you dont actually need hashing, it could be added for performance reasons though. consistent 32 byte input to ed25519 signing function
-
-if i hash, i wouldnt be able to look at the diffs of the functions? how can i build a system that allows me to report exactly what changed in the function?
-
-instead of tracking my own diffs, i could just use git history to retrieve source code? or i could use my own standalone metadata file?
-
-problems:
-
-- cryptography
-- what decorators look like
-- how can i ensure that i can detect and report diffs correctly
-
-console print
-and ruff for linting code
-should i lint my rust code?
-ill probobly have to fix my import paths for python at some point
-fix recursive function calls. is there a more reliable way to change the code
+- do i need to fix my python import paths/strucutre of project?
+- fix spacing issues within adding decorators
+- ensure tool works with recursive functions and classes
+- start adding tests to make sure tool continues to work
+- also start to measure the performance of the tool
+- use git api to track diffs? (other option is using my own .vurze metadata file)
+- update the cli to use rich console for better
+- update to use ruff to lint python code
+- update to use ____ to lint rust code
+- create a finalized readme file
+- hook up to pypi for first release and set up github actions for publishing / releasing
