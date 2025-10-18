@@ -14,6 +14,7 @@ from pathlib import Path
 
 from .setup import setup_keypair
 from .add_decorators import add_decorators_to_functions
+from .check_decorators import check_decorators_on_functions
 
 def main():
     """Main CLI entry point."""
@@ -130,7 +131,31 @@ def handle_decorate(args):
 def handle_check(args):
     """Handle the check command."""
     file_path = str(Path(args.file_path).resolve())
-    return 1
+    
+    try:
+        # Check all decorators in the file
+        results = check_decorators_on_functions(file_path)
+        
+        # Return success if all decorated functions are valid
+        decorated_count = sum(1 for r in results.values() if r["has_decorator"])
+        valid_count = sum(1 for r in results.values() if r["valid"])
+        
+        if decorated_count == 0:
+            print("⚠️  No vurze decorators found in this file.")
+            return 0
+        elif valid_count == decorated_count:
+            print("✓ All decorators are valid!")
+            return 0
+        else:
+            print(f"✗ {decorated_count - valid_count} decorator(s) failed verification!")
+            return 1
+            
+    except RuntimeError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+    except Exception as e:
+        print(f"Unexpected error while checking decorators: {e}", file=sys.stderr)
+        return 1
 
 
 if __name__ == '__main__':
