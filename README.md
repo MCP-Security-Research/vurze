@@ -82,7 +82,6 @@ vurze --help
 todo:
 
 - luman art deco implementation for decorators
-- strings and comments error in ast parsing
 - do i need to fix my python import paths/strucutre of project?
 - fix spacing issues within adding decorators
 - ensure tool works with recursive functions and classes

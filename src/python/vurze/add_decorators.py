@@ -22,97 +22,114 @@ def add_decorators_to_functions(file_path: str) -> str:
     # Parse the Python source code into an Abstract Syntax Tree (AST)
     tree = ast.parse(content)
     
-    # Iterate through each node in the AST
-    # ast.walk() returns an iterator that yields every node in the tree
+    # Split content into lines for manipulation
+    lines = content.split('\n')
+    
+    # First pass: Remove existing vurze decorators
+    lines_to_remove = set()
     for node in ast.walk(tree):
-        # Get the type name of the current AST node
-        # Each AST node has a type (e.g., "FunctionDef", "ClassDef", "If", etc.)
+        if type(node).__name__ in ("FunctionDef", "AsyncFunctionDef", "ClassDef"):
+            if hasattr(node, 'decorator_list'):
+                for decorator in node.decorator_list:
+                    is_vurze_decorator = False
+                    
+                    if isinstance(decorator, ast.Name):
+                        if decorator.id.startswith("vurze"):
+                            is_vurze_decorator = True
+                    elif isinstance(decorator, ast.Attribute):
+                        if isinstance(decorator.value, ast.Name) and decorator.value.id == "vurze":
+                            is_vurze_decorator = True
+                    elif isinstance(decorator, ast.Call):
+                        func = decorator.func
+                        if isinstance(func, ast.Attribute):
+                            if isinstance(func.value, ast.Name) and func.value.id == "vurze":
+                                is_vurze_decorator = True
+                        elif isinstance(func, ast.Name) and func.id.startswith("vurze"):
+                            is_vurze_decorator = True
+                    
+                    if is_vurze_decorator:
+                        # Mark this line for removal (convert to 0-indexed)
+                        lines_to_remove.add(decorator.lineno - 1)
+    
+    # Remove the marked lines (in reverse order to preserve indices)
+    for line_idx in sorted(lines_to_remove, reverse=True):
+        del lines[line_idx]
+    
+    # Re-parse the content after removing decorators to get updated line numbers
+    modified_content = '\n'.join(lines)
+    tree = ast.parse(modified_content)
+    
+    # Collect all functions/classes with their signatures (in reverse order to modify from bottom up)
+    decorators_to_add = []
+    
+    # Iterate through each node in the AST
+    for node in ast.walk(tree):
         node_type = type(node).__name__
         
-        # Check if this node represents a function or class definition
-        # "FunctionDef" = regular function (def function_name():)
-        # "AsyncFunctionDef" = asynchronous function (async def function_name():)
-        # "ClassDef" = class definition (class ClassName:)
         if node_type in ("FunctionDef", "AsyncFunctionDef", "ClassDef"):
-            
             # Extract the complete source code of this function/class for hashing
-            # Step 1: Create a deep copy of the node to avoid modifying the original
             node_clone = copy.deepcopy(node)
             
-            # Step 2: Get decorator_list and filter out vurze decorators
+            # Filter out vurze decorators
             if hasattr(node_clone, 'decorator_list'):
                 filtered_decorators = []
                 
                 for decorator in node_clone.decorator_list:
                     should_keep = True
                     
-                    # Check if decorator is a simple Name node starting with "vurze"
                     if isinstance(decorator, ast.Name):
                         if decorator.id.startswith("vurze"):
                             should_keep = False
-                    
-                    # Check if decorator is an Attribute node (e.g., vurze.something)
                     elif isinstance(decorator, ast.Attribute):
                         if isinstance(decorator.value, ast.Name) and decorator.value.id == "vurze":
                             should_keep = False
-                    
-                    # Check if decorator is a Call node
                     elif isinstance(decorator, ast.Call):
                         func = decorator.func
-                        # Check if call is to vurze.something()
                         if isinstance(func, ast.Attribute):
                             if isinstance(func.value, ast.Name) and func.value.id == "vurze":
                                 should_keep = False
-                        # Check if call is to vurze_something()
                         elif isinstance(func, ast.Name) and func.id.startswith("vurze"):
                             should_keep = False
                     
                     if should_keep:
                         filtered_decorators.append(decorator)
                 
-                # Replace decorator_list with filtered version
                 node_clone.decorator_list = filtered_decorators
             
-            # Step 3: Convert the filtered node back to source code
-            # Wrap in a Module for proper unparsing
+            # Convert the filtered node back to source code
             module_wrapper = ast.Module(body=[node_clone], type_ignores=[])
             function_source = ast.unparse(module_wrapper)
             
-            # Step 4: Generate hash and signature of the function/class source code
-            # Get the private key from .env file
+            # Generate hash and signature
             try:
                 private_key = get_private_key()
             except (FileNotFoundError, ValueError) as e:
                 raise RuntimeError(f"Cannot add decorators: {e}. Please run 'vurze init' first.")
             
-            # Generate cryptographic signature of the source code
             try:
                 signature = generate_signature(function_source, private_key)
             except Exception as e:
                 raise RuntimeError(f"Failed to generate signature: {e}")
             
-            # Step 5: Create decorator with the signature as the function name
-            # Format: @vurze._<signature>()
-            # Get the decorator_list attribute from the original function node
-            if hasattr(node, 'decorator_list'):
-                # Create AST nodes for: vurze._<signature>()
-                # This builds: Attribute(value=Name('vurze'), attr='_<signature>')
-                vurze_name = ast.Name(id='vurze', ctx=ast.Load())
-                # Use underscore prefix followed by the signature as the attribute name
-                signature_attr = ast.Attribute(value=vurze_name, attr=f'_{signature}', ctx=ast.Load())
-                
-                # Create the call node: vurze._<signature>()
-                call_node = ast.Call(
-                    func=signature_attr,
-                    args=[],
-                    keywords=[]
-                )
-                
-                # Insert the decorator at the beginning of the decorator list
-                node.decorator_list.insert(0, call_node)
+            # Store the line number and signature
+            # Find the line where the decorator should be added (before the def/class line)
+            # Account for existing decorators
+            decorator_line = node.lineno - 1
+            if hasattr(node, 'decorator_list') and node.decorator_list:
+                decorator_line = node.decorator_list[0].lineno - 1
+            
+            decorators_to_add.append((decorator_line, node.col_offset, signature))
     
-    # Convert the modified AST back to Python source code
-    modified_code = ast.unparse(tree)
+    # Sort in reverse order to add from bottom to top (preserves line numbers)
+    decorators_to_add.sort(reverse=True)
     
-    # Return the modified Python code
+    # Add decorators to the lines
+    for line_idx, col_offset, signature in decorators_to_add:
+        indent = ' ' * col_offset
+        decorator_line = f"{indent}@vurze._{signature}()"
+        lines.insert(line_idx, decorator_line)
+    
+    # Join lines back together
+    modified_code = '\n'.join(lines)
+    
     return modified_code
