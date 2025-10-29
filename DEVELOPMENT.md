@@ -3,6 +3,7 @@
 - create a finalized readme file
 - hook up to pypi for first release and set up github actions for publishing / releasing
 
+- what happens if someone deletes a decorator to a function?
 - make it be able to work with multiple files at once
 - ensure tool works with recursive functions and classes. basic test cases using pytest, and also cargo test???
 - would a different approach other than ast be faster/more reliable/better?
@@ -16,6 +17,7 @@
 - add .env to gitignore automatically???, check if a gitignore exists
 - update to use ruff to lint python code
 - make the tool conform to ruff linting standards
+- you can use maturin's sphinx generation for documentation?
 - update to use ____ to lint rust code
 - add boxes to the readme file. for compatable python versions, for tool version, and more
 - have a code review from professor
