@@ -13,6 +13,7 @@
 - use git api to track diffs? (other option is using my own .vurze metadata file)
 - create test cases that ensure that code runs the same after the decorators have been added
 - can my tool be attacked by adding soooooo many decorators? like should i create a limit?
+- can my tool be used against itself to attack itself
 - does my tool remove decorators that are automatically created? like does it clean up after itself properly?
 - add .env to gitignore automatically???, check if a gitignore exists
 - update to use ruff to lint python code
@@ -49,4 +50,4 @@ release commands:
 update the version in the init.py file, pyproject.toml, and Cargo.toml files
 maturin build --release
 git tag v0.1.0
-git push origin v0.1.0
+git push origin main --tags
