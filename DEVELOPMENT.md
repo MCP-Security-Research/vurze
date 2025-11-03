@@ -17,6 +17,8 @@
 - can my tool be used against itself to attack itself
 - does my tool remove decorators that are automatically created? like does it clean up after itself properly?
 
+- what sort of attack should i demonstrate? how can I demonstrate this?
+- how can my tool be used to prevent this attack? (add clear use cases and descriptions to the readme)
 - remove code duplication (consider having one file processing tool, one parser, etc)
 - update to use ruff to lint python code
 - make the tool conform to ruff linting standards
