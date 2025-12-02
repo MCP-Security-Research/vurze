@@ -1,14 +1,16 @@
 # Development TODOs
 
-- use git api to track diffs? (other option is using my own .vurze metadata file)
+- use vurze to automatically add decorators as a vs code extension + vurze as a pre-commmit hook for checking whether decorators are valid?
+- use git api to track diffs?
+- make it be able to work with multiple files at once
+
+---
 
 - kapfhammer mentioned fort knox for storing secrets? look into mise developer that made it
 - dotenv github actions problem luman
 - add .env to gitignore automatically???, check if a gitignore exists
 
-- make it be able to work with multiple files at once
 - would a different approach other than ast be faster/more reliable/better?
-
 - ensure tool works with recursive functions and classes. basic test cases using pytest, and also cargo test???
 - create test cases that ensure that code runs the same after the decorators have been added
 - what happens if someone deletes a decorator to a function
