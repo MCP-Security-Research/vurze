@@ -16,7 +16,7 @@ import typer
 from typing_extensions import Annotated
 
 from .setup import setup_keypair
-from .add_decorators import add_decorators
+from .add_decorators import add_decorators, add_decorators_to_folder
 from .check_decorators import check_decorators
 from .remove_decorators import remove_decorators
 
@@ -53,38 +53,49 @@ def init(
 def decorate(
     file_path: Annotated[
         str,
-        typer.Argument(help="Path to the Python file to decorate")
+        typer.Argument(help="Path to the Python file or folder to decorate")
     ]
 ):
-    """Add decorators to all functions and classes in a Python file."""
+    """Add decorators to all functions and classes in a Python file or all Python files in a folder."""
     path = Path(file_path)
     
-    # Validate file exists
+    # Validate path exists
     if not path.exists():
-        typer.echo(typer.style(f"Error: File '{path}' does not exist.", fg=typer.colors.RED, bold=True), err=True)
-        raise typer.Exit(code=1)
-    
-    # Validate it's a Python file
-    if not path.suffix == '.py':
-        typer.echo(typer.style(f"Error: File '{path}' is not a Python file.", fg=typer.colors.RED, bold=True), err=True)
+        typer.echo(typer.style(f"Error: Path '{path}' does not exist.", fg=typer.colors.RED, bold=True), err=True)
         raise typer.Exit(code=1)
     
     try:
-        # Add decorators to all functions and classes in the file
-        resolved_path = str(path.resolve())
-        modified_code = add_decorators(resolved_path)
+        # Handle folder path
+        if path.is_dir():
+            resolved_path = str(path.resolve())
+            decorated_files = add_decorators_to_folder(resolved_path)
+            
+            typer.echo(typer.style(f"Successfully added decorators to {len(decorated_files)} file(s):", fg=typer.colors.BLUE, bold=True))
+            for file in decorated_files:
+                typer.echo(f"  ✓ {file}")
         
-        # Write the modified code back to the file
-        with open(resolved_path, 'w') as f:
-            f.write(modified_code)
+        # Handle file path
+        else:
+            # Validate it's a Python file
+            if not path.suffix == '.py':
+                typer.echo(typer.style(f"Error: File '{path}' is not a Python file.", fg=typer.colors.RED, bold=True), err=True)
+                raise typer.Exit(code=1)
+            
+            # Add decorators to all functions and classes in the file
+            resolved_path = str(path.resolve())
+            modified_code = add_decorators(resolved_path)
+            
+            # Write the modified code back to the file
+            with open(resolved_path, 'w') as f:
+                f.write(modified_code)
+            
+            typer.echo(typer.style(f"Successfully added decorators to {resolved_path}", fg=typer.colors.BLUE, bold=True))
         
-        typer.echo(typer.style(f"Successfully added decorators to {resolved_path}", fg=typer.colors.BLUE, bold=True))
-        
-    except RuntimeError as e:
+    except (RuntimeError, FileNotFoundError, NotADirectoryError, ValueError) as e:
         typer.echo(typer.style(f"Error: {e}", fg=typer.colors.RED, bold=True), err=True)
         raise typer.Exit(code=1)
     except Exception as e:
-        typer.echo(typer.style(f"Unexpected error while decorating file: {e}", fg=typer.colors.RED, bold=True), err=True)
+        typer.echo(typer.style(f"Unexpected error while decorating: {e}", fg=typer.colors.RED, bold=True), err=True)
         raise typer.Exit(code=1)
 
 

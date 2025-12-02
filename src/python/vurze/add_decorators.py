@@ -2,6 +2,7 @@
 
 import ast
 import copy
+from pathlib import Path
 from vurze import generate_signature
 from .setup import get_private_key
 
@@ -169,3 +170,46 @@ def add_decorators(file_path: str) -> str:
     modified_code = '\n'.join(lines)
 
     return modified_code
+
+
+def add_decorators_to_folder(folder_path: str) -> list[str]:
+    """
+    Add decorators to all Python files in a folder.
+    
+    Args:
+        folder_path: Path to the folder containing Python files
+        
+    Returns:
+        List of file paths that were successfully decorated
+    """
+    folder = Path(folder_path)
+    
+    if not folder.exists():
+        raise FileNotFoundError(f"Folder '{folder_path}' does not exist.")
+    
+    if not folder.is_dir():
+        raise NotADirectoryError(f"'{folder_path}' is not a directory.")
+    
+    # Find all Python files in the folder (non-recursive)
+    python_files = list(folder.glob('*.py'))
+    
+    if not python_files:
+        raise ValueError(f"No Python files found in '{folder_path}'.")
+    
+    decorated_files = []
+    errors = []
+    
+    for py_file in python_files:
+        try:
+            modified_code = add_decorators(str(py_file))
+            with open(py_file, 'w') as f:
+                f.write(modified_code)
+            decorated_files.append(str(py_file))
+        except Exception as e:
+            errors.append((str(py_file), str(e)))
+    
+    if errors:
+        error_msg = "\n".join([f"  - {file}: {error}" for file, error in errors])
+        raise RuntimeError(f"Failed to decorate some files:\n{error_msg}")
+    
+    return decorated_files
