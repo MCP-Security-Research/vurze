@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "vurze"
-version = "0.1.1"
+version = "0.1.2"
 description = "Version control your Python functions and classes with automated cryptographic decorator injection."
 authors = [
     {name = "Aidan Dyga"}

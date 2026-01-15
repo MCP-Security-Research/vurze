@@ -54,4 +54,3 @@ update the version in the init.py file, pyproject.toml, and Cargo.toml files
 maturin build --release
 git tag v0.1.0
 git push origin main --tags
-change the cargo.toml and pyproject.toml versions to the next dev version
