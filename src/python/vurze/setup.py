@@ -6,6 +6,38 @@ from typing import Optional
 from dotenv import load_dotenv, set_key
 from vurze import generate_keypair
 
+
+def _find_env_file() -> Path:
+    """
+    Search for .env file starting from current directory and walking up to parent directories.
+    Also checks VURZE_ENV_PATH environment variable.
+    
+    Returns:
+        Path: Path to the .env file
+        
+    Raises:
+        FileNotFoundError: If no .env file is found
+    """
+    # First check if VURZE_ENV_PATH environment variable is set
+    env_path_var = os.getenv("VURZE_ENV_PATH")
+    if env_path_var:
+        env_path = Path(env_path_var)
+        if env_path.exists():
+            return env_path
+    
+    # Start from current working directory and search upward
+    current = Path.cwd()
+    
+    # Check current directory and all parent directories up to root
+    for parent in [current] + list(current.parents):
+        env_file = parent / '.env'
+        if env_file.exists():
+            return env_file
+    
+    # If not found, return the default location (current directory)
+    # This will be used in error messages
+    return Path.cwd() / '.env'
+
 def setup_keypair(env_path: Optional[str | Path] = None):
     """
     Generate and store keypair securely.
@@ -46,14 +78,14 @@ def get_public_key(env_path: Optional[str | Path] = None) -> str:
     Retrieve the public key from the .env file.
     
     Args:
-        env_path: Optional path to .env file. If None, looks in current directory.
+        env_path: Optional path to .env file. If None, searches from current directory upward.
     
     Returns:
         str: The public key hex string, or None if not found.
     """
     # Determine .env location
     if env_path is None:
-        env_path = Path.cwd() / '.env'
+        env_path = _find_env_file()
     else:
         env_path = Path(env_path)
     
@@ -78,14 +110,14 @@ def get_private_key(env_path: Optional[str | Path] = None) -> str:
     Retrieve the private key from the .env file.
     
     Args:
-        env_path: Optional path to .env file. If None, looks in current directory.
+        env_path: Optional path to .env file. If None, searches from current directory upward.
     
     Returns:
         str: The private key hex string, or None if not found.
     """
     # Determine .env location
     if env_path is None:
-        env_path = Path.cwd() / '.env'
+        env_path = _find_env_file()
     else:
         env_path = Path(env_path)
     
