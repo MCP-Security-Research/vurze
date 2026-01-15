@@ -1,6 +1,5 @@
 # Development TODOs
 
-- add a vurze --version command flag
 - make vurze extension more dynamic. what if you dont have it installed and just try extension. try to make cli + extensioni combo as flexible as possible
 - change decorate to vurze lock command
 - add .env to gitignore automatically???, check if a gitignore exists
@@ -43,6 +42,8 @@ maturin develop
 python -c "import vurze; print('Vurze imported successfully!')"
 
 COMMANDS FOR TESTING CLI
+source .venv/bin/activate
+conda deactivate
 maturin develop --release
 vurze --help
 ```

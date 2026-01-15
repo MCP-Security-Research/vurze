@@ -15,6 +15,7 @@ from pathlib import Path
 import typer
 from typing_extensions import Annotated
 
+from . import __version__
 from .setup import setup_keypair
 from .add_decorators import add_decorators, add_decorators_to_folder
 from .check_decorators import check_decorators, check_decorators_in_folder
@@ -25,6 +26,24 @@ app = typer.Typer(
     help="Version control your Python functions and classes with cryptographic decorators",
     no_args_is_help=True,
 )
+
+
+def version_callback(value: bool):
+    """Helper function to display version information."""
+    if value:
+        typer.echo(f"vurze {__version__}")
+        raise typer.Exit()
+
+
+@app.callback()
+def version(
+    version: Annotated[
+        bool,
+        typer.Option("--version", "-v", help="Show version and exit", callback=version_callback, is_eager=True)
+    ] = False
+):
+    """Report the current version of vurze installed."""
+    pass
 
 
 @app.command()
