@@ -4,7 +4,6 @@
 
 import math
 import asyncio
-import vurze
 
 def fibonacci(n):
     """Recursive function to compute the nth Fibonacci number."""

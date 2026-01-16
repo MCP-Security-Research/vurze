@@ -1,14 +1,14 @@
 """
-Command-line interface for vurze.
+Command-line interface for pyseal.
 
 Commands:
-- init: Initialize vurze with a new keypair and .env file.
-- lock: Add vurze decorators to all functions and classes in a Python file.
-- check: Check the integrity and validity of vurze decorators in a Python file.
-- remove: Remove all vurze decorators from a Python file.
+- init: Initialize pyseal with a new keypair and .env file.
+- lock: Add pyseal decorators to all functions and classes in a Python file.
+- check: Check the integrity and validity of pyseal decorators in a Python file.
+- remove: Remove all pyseal decorators from a Python file.
 
-Use `vurze --help` to see available options and command details.
-Use `vurze --version` to see the current version of vurze installed.
+Use `pyseal --help` to see available options and command details.
+Use `pyseal --version` to see the current version of pyseal installed.
 """
 
 from pathlib import Path
@@ -23,7 +23,7 @@ from .check_decorators import check_decorators, check_decorators_in_folder
 from .remove_decorators import remove_decorators, remove_decorators_from_folder
 
 app = typer.Typer(
-    name="vurze",
+    name="pyseal",
     help="Version control your Python functions and classes with cryptographic decorators",
     no_args_is_help=True,
 )
@@ -32,7 +32,7 @@ app = typer.Typer(
 def version_callback(value: bool):
     """Helper function to display version information."""
     if value:
-        typer.echo(f"vurze {__version__}")
+        typer.echo(f"pyseal {__version__}")
         raise typer.Exit()
 
 
@@ -40,10 +40,10 @@ def version_callback(value: bool):
 def version(
     version: Annotated[
         bool,
-        typer.Option("--version", help="Report the current version of vurze installed.", callback=version_callback, is_eager=True)
+        typer.Option("--version", help="Report the current version of pyseal installed.", callback=version_callback, is_eager=True)
     ] = False
 ):
-    """Report the current version of vurze installed."""
+    """Report the current version of pyseal installed."""
     pass
 
 
@@ -54,13 +54,13 @@ def init(
         typer.Argument(help="Path to the .env file")
     ] = ".env"
 ):
-    """Initialize vurze with an .env file."""
+    """Initialize pyseal with an .env file."""
     try:
         env_path = Path(env_file)
         
         # Generate and store keypair (will raise error if keys already exist)
         setup_keypair(env_path)
-        typer.echo(typer.style("Successfully initialized vurze!", fg=typer.colors.BLUE, bold=True))
+        typer.echo(typer.style("Successfully initialized pyseal!", fg=typer.colors.BLUE, bold=True))
         typer.echo(f"🔑 Keypair generated and stored in {env_path}")
         typer.echo("⚠️  Keep your .env file secure and add it to .gitignore!")
         
@@ -166,7 +166,7 @@ def check(
             
             # Summary header
             if total_decorated == 0:
-                typer.echo("⚠️  No vurze decorators found in any files.")
+                typer.echo("⚠️  No pyseal decorators found in any files.")
             elif total_valid == total_decorated:
                 typer.echo(typer.style(f"All decorators are valid in {total_files} files:", fg=typer.colors.BLUE, bold=True))
             else:
@@ -206,7 +206,7 @@ def check(
             valid_count = sum(1 for r in results.values() if r["valid"])
             
             if decorated_count == 0:
-                typer.echo("⚠️  No vurze decorators found in this file.")
+                typer.echo("⚠️  No pyseal decorators found in this file.")
             elif valid_count == decorated_count:
                 typer.echo(typer.style("All decorators are valid in 1 file:", fg=typer.colors.BLUE, bold=True))
                 typer.echo(f"{typer.style('✓', fg=typer.colors.GREEN)} {resolved_path}: {typer.style(f'{decorated_count} decorators valid', fg=typer.colors.GREEN)}")
@@ -224,10 +224,10 @@ def check(
 def remove(
     file_path: Annotated[
         str,
-        typer.Argument(help="Path to the Python file or folder to remove vurze decorators from")
+        typer.Argument(help="Path to the Python file or folder to remove pyseal decorators from")
     ]
 ):
-    """Remove vurze decorators from all functions and classes in a Python file or all Python files in a folder."""
+    """Remove pyseal decorators from all functions and classes in a Python file or all Python files in a folder."""
     path = Path(file_path)
     
     # Validate path exists
@@ -246,7 +246,7 @@ def remove(
                 for file in modified_files:
                     typer.echo(f"  {typer.style('✓', fg=typer.colors.GREEN)} {file}")
             else:
-                typer.echo("⚠️  No vurze decorators found in any files.")
+                typer.echo("⚠️  No pyseal decorators found in any files.")
         
         # Handle file path
         else:
@@ -265,7 +265,7 @@ def remove(
                 typer.echo(typer.style(f"Successfully removed decorators from 1 file:", fg=typer.colors.BLUE, bold=True))
                 typer.echo(f"  {typer.style('✓', fg=typer.colors.GREEN)} {resolved_path}")
             else:
-                typer.echo(f"⚠️  No vurze decorators found in {resolved_path}")
+                typer.echo(f"⚠️  No pyseal decorators found in {resolved_path}")
     
     except (FileNotFoundError, NotADirectoryError, ValueError) as e:
         typer.echo(typer.style(f"Error: {e}", fg=typer.colors.RED, bold=True), err=True)

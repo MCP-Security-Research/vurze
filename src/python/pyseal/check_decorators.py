@@ -4,15 +4,15 @@ import ast
 import copy
 from pathlib import Path
 from typing import Dict
-from vurze import verify_signature
+from pyseal import verify_signature
 from .setup import get_public_key
 
 
 def check_decorators(file_path: str) -> Dict[str, dict]:
     """
-    Parse a Python file and verify all vurze cryptographic decorators.
+    Parse a Python file and verify all pyseal cryptographic decorators.
     
-    This function checks that each function/class with a vurze decorator has a valid
+    This function checks that each function/class with a pyseal decorator has a valid
     signature that matches the current source code of that function/class.
     
     Args:
@@ -25,7 +25,7 @@ def check_decorators(file_path: str) -> Dict[str, dict]:
                 "valid": bool,           # Whether signature is valid
                 "signature": str,        # The signature found in decorator
                 "message": str,          # Success or error message
-                "has_decorator": bool    # Whether function has vurze decorator
+                "has_decorator": bool    # Whether function has pyseal decorator
             }
         }
     """
@@ -40,7 +40,7 @@ def check_decorators(file_path: str) -> Dict[str, dict]:
     try:
         public_key = get_public_key()
     except (FileNotFoundError, ValueError) as e:
-        raise RuntimeError(f"Cannot verify decorators: {e}. Please run 'vurze init' first.")
+        raise RuntimeError(f"Cannot verify decorators: {e}. Please run 'pyseal init' first.")
     
     # Dictionary to store results
     results = {}
@@ -53,67 +53,67 @@ def check_decorators(file_path: str) -> Dict[str, dict]:
         if node_type in ("FunctionDef", "AsyncFunctionDef", "ClassDef"):
             name = node.name
             
-            # Look for vurze decorator
+            # Look for pyseal decorator
             signature_from_decorator = None
-            has_vurze_decorator = False
+            has_pyseal_decorator = False
             
             if hasattr(node, 'decorator_list'):
                 for decorator in node.decorator_list:
-                    # Check if decorator is a Call node (e.g., @vurze._<signature>())
+                    # Check if decorator is a Call node (e.g., @pyseal._<signature>())
                     if isinstance(decorator, ast.Call):
                         func = decorator.func
-                        # Check if it's vurze._<signature>
+                        # Check if it's pyseal._<signature>
                         if isinstance(func, ast.Attribute):
-                            if isinstance(func.value, ast.Name) and func.value.id == "vurze":
+                            if isinstance(func.value, ast.Name) and func.value.id == "pyseal":
                                 attr_name = func.attr
                                 # Extract signature (remove leading underscore)
                                 if attr_name.startswith('_'):
                                     signature_from_decorator = attr_name[1:]
-                                    has_vurze_decorator = True
+                                    has_pyseal_decorator = True
                                     break
             
             # Initialize result for this function/class
             result = {
-                "has_decorator": has_vurze_decorator,
+                "has_decorator": has_pyseal_decorator,
                 "valid": False,
                 "signature": signature_from_decorator,
                 "message": ""
             }
             
-            if not has_vurze_decorator:
-                result["message"] = "No vurze decorator found"
+            if not has_pyseal_decorator:
+                result["message"] = "No pyseal decorator found"
                 results[name] = result
                 continue
             
-            # Extract the source code without vurze decorators for verification
+            # Extract the source code without pyseal decorators for verification
             node_clone = copy.deepcopy(node)
             
-            # Filter out vurze decorators from the clone
+            # Filter out pyseal decorators from the clone
             if hasattr(node_clone, 'decorator_list'):
                 filtered_decorators = []
                 
                 for decorator in node_clone.decorator_list:
                     should_keep = True
                     
-                    # Check if decorator is a simple Name node starting with "vurze"
+                    # Check if decorator is a simple Name node starting with "pyseal"
                     if isinstance(decorator, ast.Name):
-                        if decorator.id.startswith("vurze"):
+                        if decorator.id.startswith("pyseal"):
                             should_keep = False
                     
-                    # Check if decorator is an Attribute node (e.g., vurze.something)
+                    # Check if decorator is an Attribute node (e.g., pyseal.something)
                     elif isinstance(decorator, ast.Attribute):
-                        if isinstance(decorator.value, ast.Name) and decorator.value.id == "vurze":
+                        if isinstance(decorator.value, ast.Name) and decorator.value.id == "pyseal":
                             should_keep = False
                     
                     # Check if decorator is a Call node
                     elif isinstance(decorator, ast.Call):
                         func = decorator.func
-                        # Check if call is to vurze.something()
+                        # Check if call is to pyseal.something()
                         if isinstance(func, ast.Attribute):
-                            if isinstance(func.value, ast.Name) and func.value.id == "vurze":
+                            if isinstance(func.value, ast.Name) and func.value.id == "pyseal":
                                 should_keep = False
-                        # Check if call is to vurze_something()
-                        elif isinstance(func, ast.Name) and func.id.startswith("vurze"):
+                        # Check if call is to pyseal_something()
+                        elif isinstance(func, ast.Name) and func.id.startswith("pyseal"):
                             should_keep = False
                     
                     if should_keep:

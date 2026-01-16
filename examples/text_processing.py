@@ -5,7 +5,6 @@
 import re
 import asyncio
 from collections import Counter
-import vurze
 
 def is_palindrome(text):
     """Check if a string is a palindrome (ignoring case and non-alphanumeric chars)."""

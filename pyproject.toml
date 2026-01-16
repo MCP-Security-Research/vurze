@@ -3,16 +3,16 @@ requires = ["maturin>=1.9,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "vurze"
-version = "0.1.2"
-description = "Version control your Python functions and classes with automated cryptographic decorator injection."
+name = "pyseal"
+version = "0.1.0"
+description = "Cryptographically sign Python functions and classes for defense-in-depth security"
 authors = [
     {name = "Aidan Dyga"}
 ]
 requires-python = ">=3.8"
 readme = "README.md"
 license = {text = "MIT"}
-keywords = ["rust", "python", "decorator", "version-control", "cryptography"]
+keywords = ["rust", "python", "decorator", "cryptography"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -35,15 +35,15 @@ dependencies = [
 ]
 
 [project.scripts]
-vurze = "vurze.cli:main"
+pyseal = "pyseal.cli:main"
 
 [project.urls]
-Repository = "https://github.com/MCP-Security-Research/vurze"
-Issues = "https://github.com/MCP-Security-Research/vurze/issues"
+Repository = "https://github.com/MCP-Security-Research/pyseal"
+Issues = "https://github.com/MCP-Security-Research/pyseal/issues"
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
-module-name = "vurze._vurze"
+module-name = "pyseal._pyseal"
 python-source = "src/python"
 
 [tool.pytest.ini_options]
@@ -51,7 +51,7 @@ testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
-addopts = "-v -s --cov=vurze"
+addopts = "-v -s --cov=pyseal"
 
 [project.optional-dependencies]
 test = [

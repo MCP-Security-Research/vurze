@@ -15,10 +15,10 @@ dist/
 build/
 
 # Maturin generated files (avoid committing compiled extensions)
-vurze/_vurze.*.so
-vurze/_vurze.*.dylib
-vurze/_vurze.*.dll
-vurze/_vurze.*.pyd
+pyseal/_pyseal.*.so
+pyseal/_pyseal.*.dylib
+pyseal/_pyseal.*.dll
+pyseal/_pyseal.*.pyd
 
 # Operating System and Editor files (common examples)
 .DS_Store
