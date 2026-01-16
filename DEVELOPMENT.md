@@ -1,7 +1,10 @@
 # Development TODOs
 
+- include the decorators in the signature
+- update readme to refelct new command names, installation, many more
+- make sure the vurze extension is only used when vurze is initialized in the project!!!
+- current most important code todos
 - make vurze extension more dynamic. what if you dont have it installed and just try extension. try to make cli + extensioni combo as flexible as possible
-- change decorate to vurze lock command
 - add .env to gitignore automatically???, check if a gitignore exists
 - you can use maturin's sphinx generation for documentation? and a cool website
 - update to use ____ to lint rust code and ruff to lint python code
