@@ -23,37 +23,7 @@ def add_decorators(file_path: str) -> str:
     # Split content into lines for manipulation
     lines = content.split('\n')
 
-    # Dynamically add 'import pysealer' grouped with other imports if not present
-    has_import_pysealer = any(
-        line.strip() == 'import pysealer' or line.strip().startswith('import pysealer') or line.strip().startswith('from pysealer')
-        for line in lines
-    )
-    if not has_import_pysealer:
-        # Find the import block
-        import_indices = [i for i, line in enumerate(lines) if line.strip().startswith('import ') or line.strip().startswith('from ')]
-        if import_indices:
-            # Insert after the last import in the block
-            last_import = import_indices[-1]
-            lines.insert(last_import + 1, 'import pysealer')
-        else:
-            # No import block found, insert after shebang/docstring/comments as before
-            insert_at = 0
-            if lines and lines[0].startswith('#!'):
-                insert_at = 1
-            while insert_at < len(lines) and (lines[insert_at].strip() == '' or lines[insert_at].strip().startswith('"""') or lines[insert_at].strip().startswith("''")):
-                if lines[insert_at].strip().startswith('"""') or lines[insert_at].strip().startswith("''"):
-                    quote = lines[insert_at].strip()[:3]
-                    insert_at += 1
-                    while insert_at < len(lines) and not lines[insert_at].strip().endswith(quote):
-                        insert_at += 1
-                    if insert_at < len(lines):
-                        insert_at += 1
-                else:
-                    insert_at += 1
-            lines.insert(insert_at, 'import pysealer')
-
     # Parse the Python source code into an Abstract Syntax Tree (AST)
-    content = '\n'.join(lines)
     tree = ast.parse(content)
     
     # First pass: Remove existing pysealer decorators
@@ -157,8 +127,41 @@ def add_decorators(file_path: str) -> str:
 
         decorators_to_add.append((decorator_line, node.col_offset, signature))
 
+    # If no decorators to add, return original content
+    if not decorators_to_add:
+        return content
+    
     # Sort in reverse order to add from bottom to top (preserves line numbers)
     decorators_to_add.sort(reverse=True)
+
+    # Add 'import pysealer' if not present
+    has_import_pysealer = any(
+        line.strip() == 'import pysealer' or line.strip().startswith('import pysealer') or line.strip().startswith('from pysealer')
+        for line in lines
+    )
+    if not has_import_pysealer:
+        # Find the import block
+        import_indices = [i for i, line in enumerate(lines) if line.strip().startswith('import ') or line.strip().startswith('from ')]
+        if import_indices:
+            # Insert after the last import in the block
+            last_import = import_indices[-1]
+            lines.insert(last_import + 1, 'import pysealer')
+        else:
+            # No import block found, insert after shebang/docstring/comments
+            insert_at = 0
+            if lines and lines[0].startswith('#!'):
+                insert_at = 1
+            while insert_at < len(lines) and (lines[insert_at].strip() == '' or lines[insert_at].strip().startswith('"""') or lines[insert_at].strip().startswith("''")):
+                if lines[insert_at].strip().startswith('"""') or lines[insert_at].strip().startswith("''"):
+                    quote = lines[insert_at].strip()[:3]
+                    insert_at += 1
+                    while insert_at < len(lines) and not lines[insert_at].strip().endswith(quote):
+                        insert_at += 1
+                    if insert_at < len(lines):
+                        insert_at += 1
+                else:
+                    insert_at += 1
+            lines.insert(insert_at, 'import pysealer')
 
     # Add decorators to the lines
     for line_idx, col_offset, signature in decorators_to_add:
