@@ -3,9 +3,10 @@
 import ast
 import copy
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List, Tuple, Optional
 from pysealer import verify_signature
 from .setup import get_public_key
+from .git_diff import get_function_diff
 
 
 def check_decorators(file_path: str) -> Dict[str, dict]:
@@ -25,7 +26,11 @@ def check_decorators(file_path: str) -> Dict[str, dict]:
                 "valid": bool,           # Whether signature is valid
                 "signature": str,        # The signature found in decorator
                 "message": str,          # Success or error message
-                "has_decorator": bool    # Whether function has pysealer decorator
+                "has_decorator": bool,   # Whether function has pysealer decorator
+                "line_start": int,       # Starting line number
+                "line_end": int,         # Ending line number
+                "source": str,           # Function source code
+                "diff": List[Tuple]      # Git diff if validation failed
             }
         }
     """
@@ -77,7 +82,11 @@ def check_decorators(file_path: str) -> Dict[str, dict]:
                 "has_decorator": has_pysealer_decorator,
                 "valid": False,
                 "signature": signature_from_decorator,
-                "message": ""
+                "message": "",
+                "line_start": node.lineno,
+                "line_end": node.end_lineno if hasattr(node, 'end_lineno') and node.end_lineno else node.lineno,
+                "source": "",
+                "diff": None
             }
             
             if not has_pysealer_decorator:
@@ -125,6 +134,9 @@ def check_decorators(file_path: str) -> Dict[str, dict]:
             module_wrapper = ast.Module(body=[node_clone], type_ignores=[])
             function_source = ast.unparse(module_wrapper)
             
+            # Store the source code
+            result["source"] = function_source
+            
             # Verify the signature
             try:
                 is_valid = verify_signature(function_source, signature_from_decorator, public_key)
@@ -134,6 +146,20 @@ def check_decorators(file_path: str) -> Dict[str, dict]:
                     result["message"] = "✓ Signature valid - code has not been tampered with"
                 else:
                     result["message"] = "✗ Signature invalid - code may have been modified"
+                    
+                    # Try to get git diff for failed validation
+                    try:
+                        diff = get_function_diff(
+                            file_path,
+                            name,
+                            function_source,
+                            node.lineno
+                        )
+                        if diff:
+                            result["diff"] = diff
+                    except Exception:
+                        # If git diff fails, just continue without it
+                        pass
                     
             except Exception as e:
                 result["message"] = f"✗ Error verifying signature: {e}"

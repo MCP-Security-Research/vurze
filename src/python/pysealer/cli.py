@@ -29,6 +29,28 @@ app = typer.Typer(
 )
 
 
+def _format_diff_output(func_name: str, diff_lines):
+    """Format and display git diff with color coding."""
+    if not diff_lines:
+        return
+    
+    typer.echo(f"    Function '{func_name}' was modified:")
+    
+    for diff_type, content, line_num in diff_lines:
+        # Format line with appropriate styling
+        if diff_type == '-':
+            # Deletions in red
+            line_str = f"      {line_num:<4}{typer.style('-', fg=typer.colors.RED)}{typer.style(content, fg=typer.colors.RED)}"
+        elif diff_type == '+':
+            # Additions in green
+            line_str = f"      {line_num:<4}{typer.style('+', fg=typer.colors.GREEN)}{typer.style(content, fg=typer.colors.GREEN)}"
+        else:
+            # Context lines in dim/default color
+            line_str = f"      {line_num:<4} {content}"
+        
+        typer.echo(line_str)
+
+
 def version_callback(value: bool):
     """Helper function to display version information."""
     if value:
@@ -231,6 +253,12 @@ def check(
                             typer.echo(f"  {typer.style('✓', fg=typer.colors.GREEN)} {file_path}")
                         else:
                             typer.echo(f"  {typer.style('✗', fg=typer.colors.RED)} {file_path}")
+                            
+                            # Show diff for each failed function
+                            for func_name, result in results.items():
+                                if result["has_decorator"] and not result["valid"]:
+                                    if result.get("diff"):
+                                        _format_diff_output(func_name, result["diff"])
             
             # Exit with error if there were failures
             if total_decorated > 0 and total_valid < total_decorated:
@@ -259,6 +287,13 @@ def check(
                 decorator_word = "decorator" if decorated_count == 1 else "decorators"
                 typer.echo(typer.style(f"{failed}/{decorated_count} {decorator_word} failed in 1 file:", fg=typer.colors.BLUE, bold=True), err=True)
                 typer.echo(f"  {typer.style('✗', fg=typer.colors.RED)} {resolved_path}")
+                
+                # Show diff for each failed function
+                for func_name, result in results.items():
+                    if result["has_decorator"] and not result["valid"]:
+                        if result.get("diff"):
+                            _format_diff_output(func_name, result["diff"])
+                
                 raise typer.Exit(code=1)
     
     except (FileNotFoundError, NotADirectoryError, ValueError) as e:
