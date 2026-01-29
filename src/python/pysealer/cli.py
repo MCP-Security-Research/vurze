@@ -232,7 +232,7 @@ def check(
                             typer.echo(f"  {typer.style('✓', fg=typer.colors.GREEN)} {file_path}: {typer.style(f'{decorated_count} {decorator_word} valid', fg=typer.colors.GREEN)}")
                         else:
                             failed = decorated_count - valid_count
-                            decorator_word = "decorator" if failed == 1 else "decorators"
+                            decorator_word = "decorator" if decorated_count == 1 else "decorators"
                             typer.echo(f"  {typer.style('✗', fg=typer.colors.RED)} {file_path}: {typer.style(f'{failed}/{decorated_count} {decorator_word} failed', fg=typer.colors.RED)}")
             
             # Exit with error if there were failures
@@ -259,7 +259,7 @@ def check(
                 typer.echo(f"{typer.style('✓', fg=typer.colors.GREEN)} {resolved_path}: {typer.style(f'{decorated_count} {decorator_word} valid', fg=typer.colors.GREEN)}")
             else:
                 failed = decorated_count - valid_count
-                decorator_word = "decorator" if failed == 1 else "decorators"
+                decorator_word = "decorator" if decorated_count == 1 else "decorators"
                 typer.echo(typer.style(f"{failed}/{decorated_count} {decorator_word} failed in 1 file:", fg=typer.colors.BLUE, bold=True), err=True)
                 typer.echo(f"  {typer.style('✗', fg=typer.colors.RED)} {resolved_path}: {typer.style(f'{failed}/{decorated_count} {decorator_word} failed', fg=typer.colors.RED)}")
                 raise typer.Exit(code=1)
