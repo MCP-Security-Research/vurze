@@ -199,7 +199,7 @@ def check(
             
             total_decorated = 0
             total_valid = 0
-            total_files = 0
+            files_with_decorators = []
             files_with_issues = []
             
             for file_path, results in all_results.items():
@@ -209,29 +209,25 @@ def check(
                     files_with_issues.append(file_path)
                     continue
                 
-                total_files += 1
                 decorated_count = sum(1 for r in results.values() if r["has_decorator"])
-                valid_count = sum(1 for r in results.values() if r["valid"])
                 
-                total_decorated += decorated_count
-                total_valid += valid_count
-                
-                # Track files with validation failures
-                if decorated_count > 0 and valid_count < decorated_count:
-                    files_with_issues.append(file_path)
+                # Only count files that have decorators
+                if decorated_count > 0:
+                    valid_count = sum(1 for r in results.values() if r["valid"])
+                    files_with_decorators.append(file_path)
+                    total_decorated += decorated_count
+                    total_valid += valid_count
+                    
+                    # Track files with validation failures
+                    if valid_count < decorated_count:
+                        files_with_issues.append(file_path)
             
             # Summary header
             if total_decorated == 0:
-                python_files = list(path.rglob("*.py"))
-                if python_files:
-                    typer.echo(typer.style(f"No pysealer decorators found in {len(python_files)} files:", fg=typer.colors.YELLOW, bold=True))
-                    for file in python_files:
-                        typer.echo(f"  {typer.style('⊘', fg=typer.colors.YELLOW)} {file.resolve()}")
-                else:
-                    typer.echo(typer.style(f"No Python files found in folder.", fg=typer.colors.YELLOW, bold=True))
+                typer.echo(typer.style(f"No pysealer decorators found in folder.", fg=typer.colors.YELLOW, bold=True))
             elif total_valid == total_decorated:
-                file_word = "file" if total_files == 1 else "files"
-                typer.echo(typer.style(f"All decorators are valid in {total_files} {file_word}:", fg=typer.colors.BLUE, bold=True))
+                file_word = "file" if len(files_with_decorators) == 1 else "files"
+                typer.echo(typer.style(f"All decorators are valid in {len(files_with_decorators)} {file_word}:", fg=typer.colors.BLUE, bold=True))
             else:
                 failed_count = total_decorated - total_valid
                 failed_files = len(files_with_issues)
@@ -239,26 +235,26 @@ def check(
                 file_word = "file" if failed_files == 1 else "files"
                 typer.echo(typer.style(f"{failed_count} {decorator_word} failed in {failed_files} {file_word}:", fg=typer.colors.BLUE, bold=True), err=True)
             
-            # File-by-file details
+            # File-by-file details - only show files with decorators
             if total_decorated > 0:
-                for file_path, results in all_results.items():
+                for file_path in files_with_decorators:
+                    results = all_results[file_path]
                     if "error" in results:
                         continue
                     
                     decorated_count = sum(1 for r in results.values() if r["has_decorator"])
                     valid_count = sum(1 for r in results.values() if r["valid"])
                     
-                    if decorated_count > 0:
-                        if valid_count == decorated_count:
-                            typer.echo(f"  {typer.style('✓', fg=typer.colors.GREEN)} {file_path}")
-                        else:
-                            typer.echo(f"  {typer.style('✗', fg=typer.colors.RED)} {file_path}")
-                            
-                            # Show diff for each failed function
-                            for func_name, result in results.items():
-                                if result["has_decorator"] and not result["valid"]:
-                                    if result.get("diff"):
-                                        _format_diff_output(func_name, result["diff"])
+                    if valid_count == decorated_count:
+                        typer.echo(f"  {typer.style('✓', fg=typer.colors.GREEN)} {file_path}")
+                    else:
+                        typer.echo(f"  {typer.style('✗', fg=typer.colors.RED)} {file_path}")
+                        
+                        # Show diff for each failed function
+                        for func_name, result in results.items():
+                            if result["has_decorator"] and not result["valid"]:
+                                if result.get("diff"):
+                                    _format_diff_output(func_name, result["diff"])
             
             # Exit with error if there were failures
             if total_decorated > 0 and total_valid < total_decorated:
@@ -327,21 +323,10 @@ def remove(
             resolved_path = str(path.resolve())
             modified_files = remove_decorators_from_folder(resolved_path)
             
-            if modified_files:
-                file_word = "file" if len(modified_files) == 1 else "files"
-                typer.echo(typer.style(f"Successfully removed decorators from {len(modified_files)} {file_word}:", fg=typer.colors.BLUE, bold=True))
-                for file in modified_files:
-                    typer.echo(f"  {typer.style('✓', fg=typer.colors.GREEN)} {file}")
-            else:
-                # Find all Python files to show in the output
-                python_files = list(path.rglob("*.py"))
-                if python_files:
-                    file_word = "file" if len(python_files) == 1 else "files"
-                    typer.echo(typer.style(f"No pysealer decorators found in {len(python_files)} {file_word}:", fg=typer.colors.YELLOW, bold=True))
-                    for file in python_files:
-                        typer.echo(f"  {typer.style('⊘', fg=typer.colors.YELLOW)} {file.resolve()}")
-                else:
-                    typer.echo(typer.style(f"No Python files found in folder.", fg=typer.colors.YELLOW, bold=True))
+            file_word = "file" if len(modified_files) == 1 else "files"
+            typer.echo(typer.style(f"Successfully removed decorators from {len(modified_files)} {file_word}:", fg=typer.colors.BLUE, bold=True))
+            for file in modified_files:
+                typer.echo(f"  {typer.style('✓', fg=typer.colors.GREEN)} {file}")
         
         # Handle file path
         else:
@@ -374,18 +359,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-'''
-modify the check command to print out the specific reason why the decorator is invalid for each that fails. basically i need to get the diff of the previos to the current using git somehow and print the dif in a super readable and user friendly way.
-
-1. Color-code the diff lines
-2. Add context lines (show unchanged code around changes)
-get rid of what comes after this /Users/aidandyga/Downloads/SeniorThesis/pysealer/examples/math_operations.py:
-specifically1/5 decorators failed or 7 decorators valid. i dont need this showing up
-
-ex. 
-2 decorators failed in 2 files:
-  ✗ /Users/aidandyga/Downloads/SeniorThesis/pysealer/examples/math_operations.py: 1/5 decorators failed
-  ✓ /Users/aidandyga/Downloads/SeniorThesis/pysealer/examples/text_processing.py: 7 decorators valid
-  ✗ /Users/aidandyga/Downloads/SeniorThesis/pysealer/examples/fibonacci.py: 1/1 decorator failed
-'''

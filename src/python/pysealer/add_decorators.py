@@ -201,7 +201,7 @@ def add_decorators_to_folder(folder_path: str) -> list[str]:
         folder_path: Path to the folder containing Python files
         
     Returns:
-        List of file paths that were successfully decorated
+        List of file paths where decorators were successfully added
     """
     folder = Path(folder_path)
     
